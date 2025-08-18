@@ -1,480 +1,223 @@
-import React, { useState, useEffect, useRef, type ChangeEvent, type FormEvent } from 'react';
+import React, { useState, useEffect, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { toast } from 'react-toastify';
-import {
-  FaUser,
-  FaEnvelope,
-  FaLock,
-  FaCalendarAlt,
-  FaSave,
-  FaCamera,
-  FaEye,
-  FaEyeSlash,
-  FaSpinner,
-} from 'react-icons/fa';
 import InputField from '../components/common/InputField';
 import Button from '../components/Button';
-import styled, { keyframes, css } from 'styled-components';
+import { toast } from 'react-toastify';
+import { FaUser, FaEnvelope, FaLock, FaCalendarAlt, FaSave, FaCamera, FaEye, FaEyeSlash } from 'react-icons/fa';
 
-// --- Animations ---
-const fadeIn = keyframes`
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-`;
-
-const spin = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`;
-
-// --- Types ---
-interface User {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  birthDate?: string;
-  photoUrl?: string;
-}
-
-type FormData = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  birthDate: string;
-  oldPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-};
-
-type ShowPasswordState = {
-  oldPassword: boolean;
-  newPassword: boolean;
-  confirmPassword: boolean;
-};
-
-// --- Styles (Styled Components) ---
-const ProfilePage = styled.div`
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f0f8ff 0%, #e6f7ff 100%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
-`;
-
-const ProfileContainer = styled.div<{ animate: boolean }>`
-  width: 100%;
-  max-width: 500px;
-  background: white;
-  padding: 2rem;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-
-  ${({ animate }) =>
-    animate &&
-    css`
-      animation: ${fadeIn} 0.6s ease-out;
-    `}
-
-  position: relative;
-  overflow: hidden;
-`;
-
-const LogoContainer = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 2rem;
-  gap: 1rem;
-`;
-
-const LogoCircle = styled.div`
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 3px solid #28a745;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: white;
-`;
-
-const LogoInnerCircle = styled.div`
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: #28a745;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  font-weight: bold;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const ProfilePictureContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  position: relative;
-`;
-
-const ProfilePicture = styled.label`
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  overflow: hidden;
-  cursor: pointer;
-  border: 4px solid #28a745;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #f0f0f0;
-  transition: all 0.3s ease;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-`;
-
-const CameraIcon = styled(FaCamera)`
-  font-size: 2.5rem;
-  color: #28a745;
-`;
-
-const RemovePhotoButton = styled.button`
-  margin-top: 0.5rem;
-  background: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-
-  &:hover {
-    background: #c82333;
-  }
-`;
-
-const InputContainer = styled.div`
-  position: relative;
-  margin-bottom: 1rem;
-`;
-
-const Icon = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 1rem;
-  transform: translateY(-50%);
-  color: #28a745;
-  z-index: 1;
-`;
-
-const ErrorText = styled.small`
-  color: #dc3545;
-  font-size: 0.8rem;
-  margin-top: 0.25rem;
-  display: block;
-`;
-
-const PasswordContainer = styled.div`
-  position: relative;
-`;
-
-const ShowPasswordButton = styled.button`
-  position: absolute;
-  top: 50%;
-  right: 1rem;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #28a745;
-  z-index: 1;
-`;
-
-const SubmitButton = styled(Button)`
-  background: #28a745;
-  color: white;
-  border-radius: 12px;
-  padding: 0.8rem;
-  font-weight: bold;
-  margin-top: 1rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-
-  &:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-  }
-`;
-
-const LogoutButton = styled(Button)`
-  background: #dc3545;
-  color: white;
-  border-radius: 12px;
-  padding: 0.8rem;
-  font-weight: bold;
-  margin-top: 0.5rem;
-`;
-
-const Overlay = styled.div`
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.2);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 20px;
-  z-index: 10;
-`;
-
-const Spinner = styled(FaSpinner)`
-  font-size: 2rem;
-  color: #28a745;
-  animation: ${spin} 1s linear infinite;
-`;
-
-// --- Composant Profile ---
 const Profile: React.FC = () => {
+  interface User {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    birthDate?: string;
+    photoUrl?: string;
+  }
+
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // État initial sécurisé
-  const [formData, setFormData] = useState<FormData>({
-    firstName: user?.firstName ?? '',
-    lastName: user?.lastName ?? '',
-    email: user?.email ?? '',
-    birthDate: user?.birthDate ?? '',
+  const [formData, setFormData] = useState({
+    firstName: (user as User)?.firstName || '',
+    lastName: (user as User)?.lastName || '',
+    email: (user as User)?.email || '',
+    birthDate: (user as User)?.birthDate || '',
     oldPassword: '',
     newPassword: '',
-    confirmPassword: '',
+    confirmPassword: ''
   });
 
   const [photo, setPhoto] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(user?.photoUrl ?? null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [photoPreview, setPhotoPreview] = useState<string | null>(
+    (user && typeof (user as { photoUrl?: string }).photoUrl === 'string' ? (user as { photoUrl?: string }).photoUrl! : null)
+  );
+
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState<ShowPasswordState>({
-    oldPassword: false,
-    newPassword: false,
-    confirmPassword: false,
-  });
-  const [animate, setAnimate] = useState(false);
 
-  // Animation au montage
-  useEffect(() => {
-    setAnimate(true);
-  }, []);
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [animation, setAnimation] = useState(false);
 
-  // Nettoyage de l'URL de la photo
+  useEffect(() => setAnimation(true), []);
+
   useEffect(() => {
     if (photo) {
       const objectUrl = URL.createObjectURL(photo);
       setPhotoPreview(objectUrl);
-      return () => {
-        URL.revokeObjectURL(objectUrl);
-      };
-    } else if (user?.photoUrl) {
-      setPhotoPreview(user.photoUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    } else if (user && typeof (user as { photoUrl?: string }).photoUrl === 'string') {
+      setPhotoPreview((user as { photoUrl?: string }).photoUrl!);
     } else {
       setPhotoPreview(null);
     }
-  }, [photo, user?.photoUrl]);
+  }, [photo, user]);
 
-  // Validation des champs
   const validateField = (name: string, value: string) => {
     let error = '';
-    switch (name) {
-      case 'firstName':
-      case 'lastName':
-        if (!value.trim()) error = 'Ce champ est requis';
-        break;
-      case 'email':
-        if (!/\S+@\S+\.\S+/.test(value)) error = 'Email invalide';
-        break;
-      case 'newPassword':
-        if (value && value.length < 6) error = 'Minimum 6 caractères';
-        break;
-      case 'confirmPassword':
-        if (value !== formData.newPassword) error = 'Les mots de passe ne correspondent pas';
-        break;
-      default:
-        break;
+    if ((name === 'firstName' || name === 'lastName') && value.trim() === '') {
+      error = 'Ce champ est requis';
     }
-    setErrors((prev) => ({ ...prev, [name]: error }));
+    if (name === 'email' && !/\S+@\S+\.\S+/.test(value)) {
+      error = 'Email invalide';
+    }
+    if (name === 'newPassword' && value && value.length < 6) {
+      error = 'Mot de passe trop court (min 6 caractères)';
+    }
+    if (name === 'confirmPassword' && value !== formData.newPassword) {
+      error = 'Les mots de passe ne correspondent pas';
+    }
+    setErrors(prev => ({ ...prev, [name]: error }));
   };
 
-  // Gestion des changements
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
     validateField(name, value);
   };
 
-  // Gestion de la photo
   const handlePhotoChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
+    if (e.target.files && e.target.files[0]) {
       setPhoto(e.target.files[0]);
     }
   };
 
   const removePhoto = () => {
     setPhoto(null);
-    setPhotoPreview(user?.photoUrl ?? null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    setPhotoPreview(null);
   };
 
-  // Soumission du formulaire
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation finale
-    if (formData.newPassword && !formData.oldPassword) {
-      toast.error('Ancien mot de passe requis pour le changer');
+    const hasErrors = Object.values(errors).some(err => err);
+    if (hasErrors) {
+      toast.error('Veuillez corriger les erreurs avant de soumettre');
       return;
     }
-    if (formData.newPassword !== formData.confirmPassword) {
-      toast.error('Les mots de passe ne correspondent pas');
+
+    if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
+      toast.error('Les nouveaux mots de passe ne correspondent pas');
       return;
     }
 
     setIsSubmitting(true);
+
     try {
       const data = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value && key !== 'confirmPassword') {
-          data.append(key, value);
-        }
-      });
+      data.append('firstName', formData.firstName);
+      data.append('lastName', formData.lastName);
+      data.append('email', formData.email);
+      data.append('birthDate', formData.birthDate);
+      if (formData.oldPassword) data.append('oldPassword', formData.oldPassword);
+      if (formData.newPassword) data.append('newPassword', formData.newPassword);
       if (photo) data.append('photo', photo);
 
       const response = await fetch('https://flask-back-api-for-project.onrender.com/profile/update', {
         method: 'POST',
         body: data,
-        credentials: 'include',
+        credentials: 'include'
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Erreur inconnue' }));
-        throw new Error(errorData.message || 'Échec de la mise à jour');
+        const errRes = await response.json();
+        throw new Error(errRes.message || 'Erreur serveur');
       }
 
       const result = await response.json();
-      if (result.photoUrl) {
-        setPhotoPreview(result.photoUrl);
-      }
+      if (result.photoUrl) setPhotoPreview(result.photoUrl);
+
       toast.success('Profil mis à jour avec succès !');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erreur inconnue');
+      // updateUser(result.user); // si tu as une fonction pour mettre à jour le contexte
+    } catch (error: unknown) {
+      if (error instanceof Error) toast.error(error.message || 'Erreur lors de la mise à jour du profil');
+      else toast.error('Erreur lors de la mise à jour du profil');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Déconnexion
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  // Toggle mot de passe
-  const toggleShowPassword = (field: keyof ShowPasswordState) => {
-    setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }));
-  };
-
-  // Rendu
   return (
-    <ProfilePage>
-      <ProfileContainer animate={animate}>
+    <div className="profile-page" style={pageStyle}>
+      <div
+        className="profile-container"
+        style={{
+          ...containerStyle,
+          transform: animation ? 'translateY(0)' : 'translateY(20px)',
+          opacity: animation ? 1 : 0,
+          transition: 'all 0.6s ease-out'
+        }}
+      >
         {isSubmitting && (
-          <Overlay>
-            <Spinner />
-          </Overlay>
+          <div style={overlayStyle}>
+            <div style={spinnerStyle} aria-label="Chargement en cours" />
+          </div>
         )}
-        <LogoContainer>
-          <LogoCircle>
-            <LogoInnerCircle>{user?.firstName?.charAt(0) ?? 'U'}</LogoInnerCircle>
-          </LogoCircle>
-          <h1 style={{ color: '#28a745', fontWeight: 'bold', margin: 0 }}>Mon Profil</h1>
-        </LogoContainer>
-        <Form onSubmit={handleSubmit}>
-          <ProfilePictureContainer>
-            <ProfilePicture htmlFor="photo-upload">
+
+        <div className="logo-container" style={logoStyle}>
+          <div style={logoCircleStyle}>
+            <div style={logoInnerCircleStyle}>
+              <span style={logoSpanStyle}>{user?.firstName?.charAt(0) || 'U'}</span>
+            </div>
+          </div>
+          <h1 style={logoTextStyle}>Mon Profil</h1>
+        </div>
+
+        <form onSubmit={handleSubmit} style={formStyle} noValidate>
+          <div style={profilePictureContainer}>
+            <label htmlFor="photo-upload" style={profilePictureStyle} title="Changer la photo de profil">
               {photoPreview ? (
-                <img src={photoPreview} alt="Photo de profil" />
+                <img src={photoPreview} alt="Aperçu photo de profil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                <CameraIcon />
+                <FaCamera style={cameraIconStyle} />
               )}
-            </ProfilePicture>
-            <input
-              type="file"
-              id="photo-upload"
-              ref={fileInputRef}
-              accept="image/*"
-              onChange={handlePhotoChange}
-              style={{ display: 'none' }}
-            />
+              <input type="file" id="photo-upload" accept="image/*" onChange={handlePhotoChange} style={{ display: 'none' }} />
+            </label>
             {photoPreview && (
-              <RemovePhotoButton type="button" onClick={removePhoto}>
+              <button type="button" onClick={removePhoto} style={removePhotoButtonStyle} aria-label="Supprimer la photo de profil">
                 Supprimer
-              </RemovePhotoButton>
+              </button>
             )}
-          </ProfilePictureContainer>
-          <InputContainer>
-            <Icon><FaUser /></Icon>
-            <InputField
-              label="Prénom"
-              type="text"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              required
-              placeholder="Votre prénom"
-              style={{ paddingLeft: '3rem' }}
-              error={errors.firstName}
-            />
-            {errors.firstName && <ErrorText>{errors.firstName}</ErrorText>}
-          </InputContainer>
-          <InputContainer>
-            <Icon><FaUser /></Icon>
-            <InputField
-              label="Nom"
-              type="text"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              required
-              placeholder="Votre nom"
-              style={{ paddingLeft: '3rem' }}
-              error={errors.lastName}
-            />
-            {errors.lastName && <ErrorText>{errors.lastName}</ErrorText>}
-          </InputContainer>
-          <InputContainer>
-            <Icon><FaEnvelope /></Icon>
+          </div>
+
+          <div style={nameContainer}>
+            {['firstName', 'lastName'].map((field) => (
+              <div key={field} style={inputContainerStyle}>
+                {field === 'firstName' && <FaUser style={{ ...iconStyle, color: '#28a745' }} />}
+                <InputField
+                  label={field === 'firstName' ? 'Prénom' : 'Nom'}
+                  type="text"
+                  name={field}
+                  value={formData[field as keyof typeof formData]}
+                  onChange={handleChange}
+                  required
+                  placeholder={field === 'firstName' ? 'Votre prénom' : 'Votre nom'}
+                  style={{
+                    paddingLeft: '40px',
+                    borderRadius: '12px',
+                    borderColor: errors[field] ? '#dc3545' : undefined
+                  }}
+                  aria-invalid={!!errors[field]}
+                  aria-describedby={`error-${field}`}
+                />
+                {errors[field] && (
+                  <small id={`error-${field}`} style={errorTextStyle}>
+                    {errors[field]}
+                  </small>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div style={inputContainerStyle}>
+            <FaEnvelope style={{ ...iconStyle, color: '#28a745' }} />
             <InputField
               label="Email"
               type="email"
@@ -483,74 +226,130 @@ const Profile: React.FC = () => {
               onChange={handleChange}
               required
               placeholder="votre.email@example.com"
-              style={{ paddingLeft: '3rem' }}
-              error={errors.email}
+              style={{ paddingLeft: '40px', borderRadius: '12px', borderColor: errors.email ? '#dc3545' : undefined }}
+              aria-invalid={!!errors.email}
+              aria-describedby="error-email"
             />
-            {errors.email && <ErrorText>{errors.email}</ErrorText>}
-          </InputContainer>
-          <InputContainer>
-            <Icon><FaCalendarAlt /></Icon>
+            {errors.email && <small id="error-email" style={errorTextStyle}>{errors.email}</small>}
+          </div>
+
+          <div style={inputContainerStyle}>
+            <FaCalendarAlt style={{ ...iconStyle, color: '#28a745' }} />
             <InputField
               label="Date de naissance"
               type="date"
               name="birthDate"
               value={formData.birthDate}
               onChange={handleChange}
-              required
-              style={{ paddingLeft: '3rem' }}
+              style={{ paddingLeft: '40px', borderRadius: '12px' }}
             />
-          </InputContainer>
-          {(['oldPassword', 'newPassword', 'confirmPassword'] as const).map((field) => (
-            <PasswordContainer key={field}>
-              <Icon><FaLock /></Icon>
+          </div>
+
+          {['oldPassword', 'newPassword', 'confirmPassword'].map((field, idx) => (
+            <div key={field} style={inputContainerStyle}>
+              <FaLock style={{ ...iconStyle, color: '#28a745' }} />
               <InputField
-                label={
-                  field === 'oldPassword' ? 'Ancien mot de passe' :
-                  field === 'newPassword' ? 'Nouveau mot de passe' :
-                  'Confirmer mot de passe'
-                }
-                type={showPassword[field] ? 'text' : 'password'}
+                label={field === 'oldPassword' ? 'Mot de passe actuel' : field === 'newPassword' ? 'Nouveau mot de passe' : 'Confirmer le mot de passe'}
+                type={field === 'oldPassword' ? (showOldPassword ? 'text' : 'password') : field === 'newPassword' ? (showNewPassword ? 'text' : 'password') : (showConfirmPassword ? 'text' : 'password')}
                 name={field}
-                value={formData[field]}
+                value={formData[field as keyof typeof formData]}
                 onChange={handleChange}
-                placeholder={
-                  field === 'oldPassword' ? 'Ancien mot de passe' :
-                  field === 'newPassword' ? 'Nouveau mot de passe' :
-                  'Confirmer mot de passe'
-                }
-                style={{ paddingLeft: '3rem' }}
-                error={errors[field]}
+                placeholder={field === 'oldPassword' ? 'Ancien mot de passe' : field === 'newPassword' ? 'Nouveau mot de passe' : 'Confirmer mot de passe'}
+                style={{ paddingLeft: '40px', borderRadius: '12px', borderColor: errors[field] ? '#dc3545' : undefined }}
+                aria-invalid={!!errors[field]}
+                aria-describedby={`error-${field}`}
               />
-              <ShowPasswordButton
+              <button
                 type="button"
-                onClick={() => toggleShowPassword(field)}
-                aria-label={showPassword[field] ? 'Masquer' : 'Afficher'}
+                onClick={() => {
+                  if (field === 'oldPassword') setShowOldPassword(!showOldPassword);
+                  else if (field === 'newPassword') setShowNewPassword(!showNewPassword);
+                  else setShowConfirmPassword(!showConfirmPassword);
+                }}
+                style={togglePasswordButtonStyle}
               >
-                {showPassword[field] ? <FaEyeSlash /> : <FaEye />}
-              </ShowPasswordButton>
-              {errors[field] && <ErrorText>{errors[field]}</ErrorText>}
-            </PasswordContainer>
+                {field === 'oldPassword' ? (showOldPassword ? <FaEyeSlash /> : <FaEye />) :
+                 field === 'newPassword' ? (showNewPassword ? <FaEyeSlash /> : <FaEye />) :
+                 showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+              {errors[field] && <small id={`error-${field}`} style={errorTextStyle}>{errors[field]}</small>}
+            </div>
           ))}
-          <SubmitButton type="submit" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                Enregistrement...
-                <FaSpinner />
-              </>
-            ) : (
-              <>
-                Enregistrer
-                <FaSave />
-              </>
-            )}
-          </SubmitButton>
-          <LogoutButton type="button" onClick={handleLogout}>
-            Déconnexion
-          </LogoutButton>
-        </Form>
-      </ProfileContainer>
-    </ProfilePage>
+
+          <div style={buttonContainerStyle}>
+            <Button type="submit" style={saveButtonStyle}>
+              <FaSave style={{ marginRight: '8px' }} /> Enregistrer
+            </Button>
+            <Button type="button" onClick={handleLogout} style={logoutButtonStyle}>
+              Déconnexion
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
+
+/* Styles */
+const pageStyle: React.CSSProperties = {
+  minHeight: '100vh',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: '#f5f5f5'
+};
+
+const containerStyle: React.CSSProperties = {
+  position: 'relative',
+  backgroundColor: '#fff',
+  padding: '30px',
+  borderRadius: '16px',
+  boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+  width: '100%',
+  maxWidth: '500px'
+};
+
+const overlayStyle: React.CSSProperties = {
+  position: 'absolute',
+  inset: 0,
+  backgroundColor: 'rgba(255,255,255,0.7)',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 10,
+  borderRadius: '16px'
+};
+
+const spinnerStyle: React.CSSProperties = {
+  border: '4px solid #f3f3f3',
+  borderTop: '4px solid #28a745',
+  borderRadius: '50%',
+  width: '36px',
+  height: '36px',
+  animation: 'spin 1s linear infinite'
+};
+
+const logoStyle: React.CSSProperties = { textAlign: 'center', marginBottom: '20px' };
+const logoCircleStyle: React.CSSProperties = { display: 'inline-block', borderRadius: '50%', backgroundColor: '#28a745', width: '60px', height: '60px', marginBottom: '8px' };
+const logoInnerCircleStyle: React.CSSProperties = { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' };
+const logoSpanStyle: React.CSSProperties = { color: '#fff', fontWeight: 'bold', fontSize: '24px' };
+const logoTextStyle: React.CSSProperties = { fontSize: '22px', color: '#333', margin: 0 };
+const formStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '16px' };
+
+const profilePictureContainer: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px' };
+const profilePictureStyle: React.CSSProperties = { width: '100px', height: '100px', borderRadius: '50%', overflow: 'hidden', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#e9ecef' };
+const cameraIconStyle: React.CSSProperties = { fontSize: '32px', color: '#6c757d' };
+const removePhotoButtonStyle: React.CSSProperties = { marginTop: '8px', background: 'transparent', border: 'none', color: '#dc3545', cursor: 'pointer' };
+
+const nameContainer: React.CSSProperties = { display: 'flex', gap: '12px' };
+const inputContainerStyle: React.CSSProperties = { position: 'relative', width: '100%' };
+const iconStyle: React.CSSProperties = { position: 'absolute', top: '50%', left: '12px', transform: 'translateY(-50%)', fontSize: '18px' };
+const errorTextStyle: React.CSSProperties = { color: '#dc3545', fontSize: '12px', marginTop: '4px', display: 'block' };
+
+const togglePasswordButtonStyle: React.CSSProperties = { position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer' };
+
+const buttonContainerStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', marginTop: '16px' };
+const saveButtonStyle: React.CSSProperties = { backgroundColor: '#28a745', color: '#fff' };
+const logoutButtonStyle: React.CSSProperties = { backgroundColor: '#dc3545', color: '#fff' };
 
 export default Profile;
