@@ -1,0 +1,142 @@
+/* src/components/Button.css */
+
+.custom-button {
+  display: inline-flex; /* Permet d'aligner le texte et un éventuel icône/spinner */
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Espace entre le texte et le spinner/icône */
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap; /* Empêche le texte de se casser sur plusieurs lignes */
+  text-decoration: none; /* Pour les cas où le bouton est un lien */
+}
+
+/* --- Variants --- */
+.custom-button-primary {
+  background-color: #28a745; /* Vert SportZen */
+  color: white;
+  box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+}
+
+.custom-button-primary:hover {
+  background-color: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+}
+
+.custom-button-secondary {
+  background-color: #007bff; /* Bleu standard */
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+}
+
+.custom-button-secondary:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+}
+
+.custom-button-danger {
+  background-color: #dc3545; /* Rouge pour le danger */
+  color: white;
+  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
+}
+
+.custom-button-danger:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(220, 53, 69, 0.3);
+}
+
+.custom-button-outline {
+  background-color: transparent;
+  color: #28a745; /* Texte vert */
+  border: 2px solid #28a745;
+}
+
+.custom-button-outline:hover {
+  background-color: #e6ffe6; /* Fond très léger au survol */
+  color: #218838;
+  transform: translateY(-2px);
+}
+
+/* --- Sizes --- */
+.custom-button-small {
+  padding: 8px 15px;
+  font-size: 0.85em;
+  border-radius: 6px;
+}
+
+.custom-button-medium {
+  padding: 12px 25px;
+  font-size: 1em;
+}
+
+.custom-button-large {
+  padding: 16px 30px;
+  font-size: 1.15em;
+  border-radius: 10px;
+}
+
+/* --- Full Width --- */
+.custom-button-fullwidth {
+  width: 100%;
+}
+
+/* --- Disabled State --- */
+.custom-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none; /* Annule l'effet de hover/active */
+  box-shadow: none;
+}
+
+/* --- Loading State (Spinner) --- */
+.spinner {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  width: 1em;
+  height: 1em;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+.custom-button-outline .spinner {
+  border-top: 3px solid #28a745; /* Couleur du spinner pour le variant outline */
+}
+
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Ajustement si le bouton contient un spinner quand il est désactivé */
+.custom-button-loading:disabled {
+  background-color: #28a745; /* Garde la couleur de base pour loading */
+  color: white;
+}
+.custom-button-outline.custom-button-loading:disabled {
+    background-color: transparent;
+    border-color: #28a745;
+    color: #28a745;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+  .custom-button {
+    font-size: 0.95em;
+    padding: 10px 18px;
+  }
+
+  .custom-button-large {
+    padding: 14px 25px;
+    font-size: 1.05em;
+  }
+}

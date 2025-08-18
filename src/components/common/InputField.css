@@ -1,0 +1,59 @@
+/* src/components/common/InputField.css */
+.input-field-container {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.input-field-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95em;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 15px;
+  color: #888;
+  font-size: 1.1em;
+  pointer-events: none; /* Empêche l'icône de bloquer les clics sur l'input */
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1em;
+  color: #333;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box; /* Inclure padding et border dans la largeur */
+}
+
+.input-field-with-icon {
+  padding-left: 45px; /* Espace pour l'icône */
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #28a745; /* Vert SportZen au focus */
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+}
+
+.input-field-error {
+  border-color: #dc3545; /* Rouge pour les erreurs */
+}
+
+.input-field-error-message {
+  color: #dc3545;
+  font-size: 0.85em;
+  margin-top: 5px;
+  margin-bottom: 0;
+}

@@ -1,0 +1,277 @@
+/* src/components/Header.css */
+.app-header {
+  background-color: #28a745; /* Vert SportZen profond et vibrant */
+  color: white;
+  padding: 15px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Ombre douce et élégante */
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  flex-wrap: wrap; /* Permet aux éléments de s'adapter sur plusieurs lignes si nécessaire */
+  min-height: 70px; /* Hauteur minimale pour la consistance */
+}
+
+/* --- Logo Styling --- */
+.app-header .logo {
+  color: white;
+  text-decoration: none;
+  font-size: 2.2em;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease-in-out;
+}
+
+.app-header .logo:hover {
+  transform: scale(1.02); /* Léger agrandissement au survol */
+}
+
+.app-header .logo-zen {
+  color: #f8f9fa; /* Presque blanc, pour un contraste doux */
+  font-weight: 300;
+  font-style: italic;
+  margin-left: 3px; /* Espacement subtil */
+}
+
+/* --- Navigation Principale --- */
+.app-header .main-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 35px; /* Espacement généreux entre les éléments */
+}
+
+.app-header .main-nav a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.1em;
+  font-weight: 600;
+  padding: 8px 0;
+  position: relative;
+  opacity: 0.9;
+  transition: all 0.3s ease;
+}
+
+.app-header .main-nav a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 3px;
+  bottom: -5px; /* Soulignement légèrement décalé */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white; /* Couleur du soulignement */
+  transition: width 0.3s ease-in-out;
+}
+
+.app-header .main-nav a:hover,
+.app-header .main-nav a.active { /* 'active' pour le NavLink si utilisé */
+  color: #e0e0e0;
+  opacity: 1;
+}
+
+.app-header .main-nav a:hover::after,
+.app-header .main-nav a.active::after {
+  width: 100%;
+}
+
+/* --- Actions d'Authentification --- */
+.auth-actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.auth-actions .btn-login,
+.auth-actions .btn-signup,
+.auth-actions .btn-profile,
+.auth-actions .btn-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.95em;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+  white-space: nowrap; /* Empêche le texte de se couper */
+}
+
+/* Styles spécifiques des boutons */
+.auth-actions .btn-login {
+  background-color: white;
+  color: #28a745;
+  border-color: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.auth-actions .btn-login:hover {
+  background-color: #f0f0f0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.auth-actions .btn-signup {
+  background-color: transparent;
+  color: white;
+  border-color: white;
+}
+
+.auth-actions .btn-signup:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.auth-actions .btn-profile {
+  background-color: #007bff; /* Bleu distinctif pour le profil */
+  color: white;
+  border-color: #007bff;
+}
+
+.auth-actions .btn-profile:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+.auth-actions .btn-logout {
+  background-color: #dc3545; /* Rouge pour la déconnexion */
+  color: white;
+  border-color: #dc3545;
+}
+
+.auth-actions .btn-logout:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+}
+
+/* --- Mobile Menu Toggle --- */
+.mobile-menu-toggle {
+  display: none; /* Caché par défaut */
+  background: none;
+  border: none;
+  font-size: 1.8em;
+  color: white;
+  cursor: pointer;
+  order: 3; /* Assure qu'il est à droite sur mobile */
+}
+
+/* --- Mobile Menu Overlay/Wrapper --- */
+.header-right-wrapper {
+  display: flex;
+  flex-grow: 1; /* Permet de prendre l'espace restant pour centrer la nav */
+  justify-content: center; /* Centre la navigation par défaut */
+  align-items: center;
+  gap: 30px; /* Espace entre nav et actions auth */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+  .app-header .main-nav {
+    gap: 25px; /* Réduire l'espacement pour plus de place */
+  }
+}
+
+@media (max-width: 800px) {
+  .app-header .auth-actions .btn-text {
+    /* Cache le texte des boutons d'auth pour ne garder que l'icône */
+    display: none;
+  }
+  .auth-actions .btn-login,
+  .auth-actions .btn-signup,
+  .auth-actions .btn-profile,
+  .auth-actions .btn-logout {
+    padding: 10px 12px; /* Rendre les boutons plus compacts */
+    gap: 0; /* Pas d'espace si un seul élément visible */
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    flex-wrap: nowrap; /* Empêche le retour à la ligne du header lui-même */
+    justify-content: space-between;
+    padding: 15px 20px;
+  }
+
+  .header-right-wrapper {
+    display: none; /* Cache le wrapper complet par défaut */
+    flex-direction: column;
+    width: 100%;
+    position: absolute;
+    top: 70px; /* Positionné sous le header fixe */
+    left: 0;
+    background-color: #28a745; /* Couleur de fond pour le menu mobile */
+    padding: 20px 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    animation: slideDown 0.3s ease-out forwards;
+    gap: 20px; /* Espacement entre nav et auth-actions en mode mobile */
+  }
+
+  .header-right-wrapper.is-open {
+    display: flex; /* Affiche le menu mobile quand "is-open" */
+  }
+
+  .app-header .main-nav {
+    width: 100%;
+  }
+
+  .app-header .main-nav ul {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .app-header .main-nav a {
+    width: 90%; /* Pour centrer et donner un padding */
+    text-align: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Séparateur pour les liens mobiles */
+  }
+
+  .app-header .main-nav a:last-child {
+      border-bottom: none; /* Pas de bordure pour le dernier lien */
+  }
+
+  .app-header .main-nav a::after {
+    display: none; /* Pas de soulignement sur mobile */
+  }
+
+  .auth-actions {
+    flex-direction: column; /* Boutons en colonne sur mobile */
+    width: 90%;
+    gap: 10px;
+  }
+
+  .auth-actions .btn-login,
+  .auth-actions .btn-signup,
+  .auth-actions .btn-profile,
+  .auth-actions .btn-logout {
+    width: 100%; /* Boutons pleine largeur sur mobile */
+    text-align: center;
+    padding: 12px 0; /* Ajuste le padding pour le texte caché */
+    /* Réaffiche le texte sur mobile pour ces boutons spécifiques si vous voulez */
+    display: flex; /* Garde le flex pour le centrage si le texte est réactivé */
+    justify-content: center;
+    .btn-text {
+        display: inline; /* Rétablit l'affichage du texte pour les boutons */
+    }
+  }
+
+  .mobile-menu-toggle {
+    display: block; /* Affiche le bouton de menu mobile */
+  }
+
+  /* Animation pour l'ouverture du menu mobile */
+  @keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+}
