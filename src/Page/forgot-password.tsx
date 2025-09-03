@@ -27,7 +27,7 @@ const ForgotPassword: React.FC = () => {
 
     try {
       // Appel API pour envoyer un email de réinitialisation de mot de passe
-      const response = await axios.post(' http://127.0.0.1:5000/reset_password_request', { email });
+      const response = await axios.post(' https://flask-back-api-for-project.onrender.com/reset_password_request', { email });
 
       if (response.data.success) {
         toast.success('Email de réinitialisation envoyé avec succès!');

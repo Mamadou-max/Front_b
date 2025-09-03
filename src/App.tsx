@@ -15,7 +15,8 @@ import ResetPassword from './Page/ResetPassword';
 import Activite from './Page/Activite';
 import Rapport from './Page/Rapport';
 import Parametre from './Page/Parametre';
-import NouvelleActivite from './Page/NouvelleActivite'; // <-- Ajoute cette ligne
+import NouvelleActivite from './Page/NouvelleActivite';
+import ThalesBiometricDashboard from './Page/ThalesBiometricDashboard'; // <-- Ajoutez cette ligne
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const router = createBrowserRouter([
@@ -36,7 +37,8 @@ export const router = createBrowserRouter([
       { path: 'activite', element: <Activite /> },
       { path: 'rapport', element: <Rapport /> },
       { path: 'parametre', element: <Parametre /> },
-      { path: 'nouvelle-activite', element: <NouvelleActivite /> }, // <-- Ajoute cette ligne
+      { path: 'nouvelle-activite', element: <NouvelleActivite /> },
+      { path: 'biometric-dashboard', element: <ThalesBiometricDashboard /> }, // <-- Ajoutez cette ligne
       {
         path: '*',
         element: (

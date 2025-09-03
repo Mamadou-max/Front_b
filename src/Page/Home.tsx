@@ -4,6 +4,8 @@ import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/ap
 import YouTube from 'react-youtube';
 import Button from '../components/Button';
 import { useAuth } from '../hooks/useAuth';
+import ThalesBiometricDashboard from './ThalesBiometricDashboard';
+import { Box, Card, CardContent, Typography } from '@mui/material';
 
 // Types
 type SportType =
@@ -122,6 +124,9 @@ const Home: React.FC = () => {
       }
     );
   }, []);
+
+
+  
 
   // Filtre des parcs
   const filteredParks = selectedSport === 'Tous'
@@ -261,9 +266,39 @@ const Home: React.FC = () => {
                 Se connecter
               </Button>
             </Link>
+            
           </>
         )}
       </div>
+
+    <Box sx={{
+  mt: 6,
+  mb: 4,
+  p: 3,
+  bgcolor: 'background.paper',
+  borderRadius: 2,
+  boxShadow: 3,
+  maxWidth: '100%',
+  mx: 'auto'
+}}>
+  <Typography
+    variant="h4"
+    component="h2"
+    gutterBottom
+    align="center"
+    color="primary"
+    sx={{ fontWeight: 600 }}
+  >
+  
+  </Typography>
+
+  <Card elevation={0} sx={{ borderRadius: 2, overflow: 'visible' }}>
+    <CardContent sx={{ p: 0 }}>
+      <ThalesBiometricDashboard />
+    </CardContent>
+  </Card>
+</Box>
+
 
       {/* Filtre des sports */}
       <div style={{
